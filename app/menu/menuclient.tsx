@@ -130,20 +130,21 @@ function Menu({ table }: { table: number }) {
         total={total}
         onOpen={() => setOpenCart(true)}
       />
-
-      <CartDrawer
-        open={openCart}
-        onClose={() => setOpenCart(false)}
-        cart={cart}
-        table={table}
-        total={total}
-        updateQty={updateQty}
-        updateNote={updateNote}
-        openWaiterView={() => {
-          setOpenCart(false);
-          setShowWaiter(true);
-        }}
-      />
+<CartDrawer
+  open={openCart}
+  onClose={() => setOpenCart(false)}
+  cart={cart}
+  name={name}              // ✅ ADD
+  setName={setName}        // ✅ ADD
+  table={table}
+  total={total}
+  updateQty={updateQty}
+  updateNote={updateNote}
+  openWaiterView={() => {
+    setOpenCart(false);
+    setShowWaiter(true);
+  }}
+/>
 
       {showWaiter && (
         <WaiterView
