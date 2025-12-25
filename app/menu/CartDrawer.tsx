@@ -1,91 +1,116 @@
 "use client";
 
-import type { CartItem } from "./types";
-
+import { CartItem } from "./types";
+import { useState } from "react";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   cart: CartItem[];
-  name: string;
+  name: string; 
   table: number;
   total: number;
-  updateQty: (id: string, d: number) => void;
+  updateQty: (id: string, delta: number) => void;
   updateNote: (id: string, note: string) => void;
-  openWaiterView: () => void;
+  openWaiterView: (name: string) => void;
 };
 
 export default function CartDrawer({
   open,
   onClose,
   cart,
-  name,
   table,
   total,
   updateQty,
   updateNote,
   openWaiterView,
 }: Props) {
+  const [name, setName] = useState("");
+
   if (!open) return null;
 
-  const time = new Date().toLocaleString();
+  function sendWhatsApp() {
+    if (!name.trim()) {
+      alert("Please enter your name");
+      return;
+    }
 
-  const message = encodeURIComponent(
-    `🍽️ New Order\n\nName: ${name}\nTable: ${table}\nTime: ${time}\n\n` +
-      cart
-        .map(
-          (i) =>
-            `• ${i.name} x${i.qty} ₹${i.price * i.qty}${
-              i.note ? `\n  Note: ${i.note}` : ""
-            }`
-        )
-        .join("\n") +
-      `\n\nTotal: ₹${total}`
-  );
+    const lines = cart.map(
+      (i) =>
+        `${i.name} × ${i.qty}${i.note ? `\nNote: ${i.note}` : ""}`
+    );
+
+    const msg = `
+🧾 *New Order*
+👤 Name: ${name}
+🪑 Table: ${table}
+
+${lines.join("\n\n")}
+
+💰 Total: ₹${total}
+    `.trim();
+
+    window.open(
+      `https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(msg)}`,
+      "_blank"
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-end z-50">
-      <div className="bg-white w-full p-4 rounded-t-xl">
-        <div className="flex justify-between mb-2">
-          <h2 className="font-semibold">Your Order</h2>
-          <button onClick={onClose}>Cancel</button>
+    <div className="fixed inset-0 bg-black/40 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4 max-h-[85vh] overflow-auto">
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="font-semibold text-lg">Your Order</h2>
+          <button onClick={onClose}>✕</button>
         </div>
 
-        {cart.map((i) => (
-          <div key={i.id} className="border-b py-3">
+        {/* NAME INPUT */}
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your Name"
+          className="w-full border p-3 rounded mb-4"
+        />
+
+        {/* ITEMS */}
+        {cart.map((item) => (
+          <div key={item.id} className="mb-4">
             <div className="flex justify-between">
-              <span>{i.name}</span>
-              <span>₹{i.price * i.qty}</span>
+              <span>{item.name}</span>
+              <span>₹{item.price * item.qty}</span>
             </div>
 
             <div className="flex gap-3 items-center mt-1">
-              <button onClick={() => updateQty(i.id, -1)}>−</button>
-              <span>{i.qty}</span>
-              <button onClick={() => updateQty(i.id, 1)}>+</button>
+              <button onClick={() => updateQty(item.id, -1)}>−</button>
+              <span>{item.qty}</span>
+              <button onClick={() => updateQty(item.id, 1)}>+</button>
             </div>
 
             <textarea
-              value={i.note || ""}
-              onChange={(e) => updateNote(i.id, e.target.value)}
               placeholder="Add note"
-              className="border w-full mt-2 p-2 text-sm"
+              className="w-full border p-2 rounded mt-2 text-sm"
+              onChange={(e) =>
+                updateNote(item.id, e.target.value)
+              }
             />
           </div>
         ))}
 
-        <a
-          href={`https://wa.me/?text=${message}`}
-          target="_blank"
-          className="block bg-green-600 text-white py-3 rounded text-center mt-4"
-        >
-          Send Order on WhatsApp
-        </a>
+        <div className="font-medium mb-3">Total: ₹{total}</div>
 
         <button
-          onClick={openWaiterView}
-          className="border py-3 w-full rounded mt-2"
+          onClick={() => openWaiterView(name)}
+          className="w-full bg-black text-white py-3 rounded mb-2"
         >
           Show Order to Waiter
+        </button>
+
+        <button
+          onClick={sendWhatsApp}
+          className="w-full border py-3 rounded"
+        >
+          Send Order on WhatsApp
         </button>
       </div>
     </div>
