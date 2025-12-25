@@ -1,32 +1,32 @@
 "use client";
 
 import { CartItem } from "./types";
-import { useState } from "react";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   cart: CartItem[];
-  name: string; 
+  name: string;
+  setName: (v: string) => void;
   table: number;
   total: number;
   updateQty: (id: string, delta: number) => void;
   updateNote: (id: string, note: string) => void;
-  openWaiterView: (name: string) => void;
+  openWaiterView: () => void;
 };
 
 export default function CartDrawer({
   open,
   onClose,
   cart,
+  name,
+  setName,
   table,
   total,
   updateQty,
   updateNote,
   openWaiterView,
 }: Props) {
-  const [name, setName] = useState("");
-
   if (!open) return null;
 
   function sendWhatsApp() {
@@ -35,17 +35,20 @@ export default function CartDrawer({
       return;
     }
 
+    const time = new Date().toLocaleString();
+
     const lines = cart.map(
       (i) =>
-        `${i.name} × ${i.qty}${i.note ? `\nNote: ${i.note}` : ""}`
+        `• ${i.name} × ${i.qty}${i.note ? `\n  ↳ Note: ${i.note}` : ""}`
     );
 
     const msg = `
 🧾 *New Order*
 👤 Name: ${name}
 🪑 Table: ${table}
+⏰ ${time}
 
-${lines.join("\n\n")}
+${lines.join("\n")}
 
 💰 Total: ₹${total}
     `.trim();
@@ -69,7 +72,7 @@ ${lines.join("\n\n")}
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your Name"
+          placeholder="Your name"
           className="w-full border p-3 rounded mb-4"
         />
 
@@ -90,6 +93,7 @@ ${lines.join("\n\n")}
             <textarea
               placeholder="Add note"
               className="w-full border p-2 rounded mt-2 text-sm"
+              value={item.note || ""}
               onChange={(e) =>
                 updateNote(item.id, e.target.value)
               }
@@ -100,7 +104,7 @@ ${lines.join("\n\n")}
         <div className="font-medium mb-3">Total: ₹{total}</div>
 
         <button
-          onClick={() => openWaiterView(name)}
+          onClick={openWaiterView}
           className="w-full bg-black text-white py-3 rounded mb-2"
         >
           Show Order to Waiter
