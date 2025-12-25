@@ -49,4 +49,14 @@ out
 .vscode
 .DS_Store
 Thumbs.db
+node_modules
+.next
+out
+
+.env
+.env.local
+
+.vscode
+.DS_Store
+Thumbs.db
 
